@@ -1,0 +1,180 @@
+/* styles.css */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  margin: 0;
+  padding: 0;
+}
+
+.header {
+  position: fixed;
+  width: 100%;
+  top: 0;
+  background-color: #fff; /* white */
+  color: #000; /* black */
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, height 0.3s ease, padding 0.3s ease;
+}
+
+.header.scrolled {
+  background-color: #fdd835; /* yellow */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  height: 30px; /* Height when scrolled */
+  padding: 0 20px; /* Minimize padding */
+}
+
+.logo {
+  width: 50px;
+  height: 50px;
+  margin-right: 20px;
+  transition: transform 0.3s ease;
+}
+
+.header.scrolled .logo {
+  transform: scale(0.5); /* Scale down logo */
+}
+
+.container {
+  max-width: 800px;
+  margin: 100px auto 20px; /* Adjusted margin to accommodate fixed header */
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2, h3 {
+  color: #fdd835; /* yellow */
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #fdd835; /* yellow */
+  color: #000; /* black */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+button:hover {
+  background-color: #fff; /* white */
+  color: #000; /* black */
+  border: 1px solid #fdd835; /* yellow border */
+}
+
+input[type="text"], input[type="number"] {
+  width: calc(100% - 22px);
+  padding: 10px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+input[type="text"]:focus, input[type="number"]:focus {
+  outline: none;
+  border: 1px solid #fdd835; /* yellow */
+}
+
+.table-container table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow */
+  border: 1px solid #000; /* Black border */
+}
+
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+}
+
+th {
+  background-color: #fdd835; /* yellow */
+  color: #000; /* black */
+  position: relative;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  border-bottom: 2px solid #4CAF50; /* Green underline */
+}
+
+th:hover {
+  background-color: #fff; /* white */
+  color: #000; /* black */
+}
+
+td {
+  border-bottom: 1px solid #ddd; /* Light gray border for separation */
+}
+
+tbody tr {
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+tbody tr:hover {
+  background-color: #fff; /* white */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #4CAF50; /* green border on hover */
+}
+
+tbody tr:last-child td {
+  border-bottom: none; /* Remove border from the last row */
+}
+
+.book-details {
+  margin-top: 20px;
+}
+
+.book-details table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow */
+  border: 1px solid #000; /* Black border */
+}
+
+
+.book-details td {
+  padding: 12px 15px;
+  text-align: left;
+}
+
+.book-details td {
+  border-bottom: 1px solid #ddd; /* Light gray border for separation */
+}
+
+.book-details td:first-child {
+  font-weight: bold;
+  background-color: #fdd835; /* yellow */
+  color: #000; /* black */
+}
+
+.book-details tr:last-child td {
+  border-bottom: none; /* Remove border from the last row */
+}
+
+.book-details th {
+  background-color: #fdd835; /* yellow */
+  color: #000; /* black */
+  position: relative;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  border-bottom: 2px solid #4CAF50; /* Green underline */
+}
