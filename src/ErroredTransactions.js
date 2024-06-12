@@ -7,7 +7,7 @@ const GET_ERRORED_TRANSACTION = gql`
   query GetErroredTransaction {
     getErroredTransaction {
       keyCode
-      requestjson
+      requestJson
     }
   }
 `;
@@ -18,13 +18,18 @@ const ErroredTransactions = () => {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error fetching errored transactions</p>;
 
+  // Ensure data.getErroredTransaction is defined and is an array
+  if (!data || !Array.isArray(data.getErroredTransaction)) {
+    return <p>No errored transactions found.</p>;
+  }
+
   const handleViewJSON = (json) => {
     alert(JSON.stringify(json, null, 2));
   };
 
   const handleSubmitToRestAPI = async (transaction) => {
     try {
-      const response = await axios.post('http://localhost:8010/api/store', transaction.requestjson, {
+      const response = await axios.post('http://localhost:8010/api/store', transaction.requestJson, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -52,7 +57,7 @@ const ErroredTransactions = () => {
             <tr key={index}>
               <td>{transaction.keyCode}</td>
               <td>
-                <button onClick={() => handleViewJSON(transaction.requestjson)}>
+                <button onClick={() => handleViewJSON(transaction.requestJson)}>
                   View JSON
                 </button>
               </td>
