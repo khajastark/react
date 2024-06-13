@@ -58,13 +58,18 @@ const ErroredTransactions = () => {
   const [jsonToView, setJsonToView] = useState(null);
   const [submitMessage, setSubmitMessage] = useState('');
   const [responseModalIsOpen, setResponseModalIsOpen] = useState(false);
-  const [submittedTransactions, setSubmitted] = useState(new Set());
+  const [submittedTransactions, setSubmittedTransactions] = useState(new Set());
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) {
+    console.log('Loading data...');
+    return <p>Loading...</p>;
+  }
   if (error) {
     console.error('GraphQL query error:', error);
     return <p>Error fetching errored transactions</p>;
   }
+
+  console.log('Received data:', data);
 
   // Ensure data.getErroredTransaction is defined and is an array
   if (!data || !Array.isArray(data.getErroredTransaction)) {
@@ -73,25 +78,35 @@ const ErroredTransactions = () => {
   }
 
   const handleViewJSON = (json) => {
+    console.log('Viewing JSON:', json);
     setJsonToView(json);
     setModalIsOpen(true);
   };
 
   const handleSubmitToRestAPI = async (transaction) => {
+    console.log('Submitting transaction:', transaction);
     try {
       const response = await axios.post('http://localhost:8010/api/store', transaction.requestJson, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
+      console.log('Response from REST API:', response);
       setSubmitMessage(`Response: ${response.status} - ${response.statusText}`);
-      setSubmitted(new Set(submittedTransactions).add(transaction.keyCode));
+      setSubmittedTransactions(prevSet => {
+        const newSet = new Set(prevSet);
+        newSet.add(transaction.keyCode);
+        console.log('Updated submittedTransactions:', newSet);
+        return newSet;
+      });
     } catch (error) {
       console.error('Error submitting to REST API:', error);
       setSubmitMessage(`Error: ${error.response?.status} - ${error.response?.statusText}`);
     }
     setResponseModalIsOpen(true);
   };
+
+  console.log('Current submittedTransactions:', submittedTransactions);
 
   return (
     <div className="container">
