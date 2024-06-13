@@ -1,51 +1,13 @@
 import React, { useState } from 'react';
 import { useQuery, gql } from '@apollo/client';
 import axios from 'axios';
-import Modal from 'react-modal';
-import './styles.css'; // Ensure this is imported to apply styles
+import Modal from 'react-modal'; // Make sure react-modal is installed and imported properly
 
-// Set up modal styles
-const customStyles = {
-  content: {
-    top: 'auto',
-    left: '50%',
-    right: 'auto',
-    bottom: '20px',
-    marginRight: '-50%',
-    transform: 'translate(-50%, 0)',
-    width: '80%',
-    maxHeight: '80vh',
-    overflow: 'auto',
-    borderRadius: '10px',
-    border: '1px solid #000',
-    padding: '20px',
-    backgroundColor: '#fff',
-  },
-};
-
-// Response message modal styles
-const responseModalStyles = {
-  content: {
-    top: '50%',
-    left: '50%',
-    right: 'auto',
-    bottom: 'auto',
-    marginRight: '-50%',
-    transform: 'translate(-50%, -50%)',
-    width: '400px',
-    borderRadius: '10px',
-    border: '1px solid #000',
-    padding: '20px',
-    backgroundColor: '#fff',
-  },
-};
-
-// Set the app element for accessibility
-Modal.setAppElement('#root'); // Replace '#root' with the id of your app's root element
-
+// GraphQL query to fetch errored transactions
 const GET_ERRORED_TRANSACTION = gql`
   query GetErroredTransaction {
     getErroredTransaction {
+      id
       keyCode
       requestJson
     }
@@ -54,44 +16,53 @@ const GET_ERRORED_TRANSACTION = gql`
 
 const ErroredTransactions = () => {
   const { loading, error, data } = useQuery(GET_ERRORED_TRANSACTION);
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [jsonToView, setJsonToView] = useState(null);
-  const [submitMessage, setSubmitMessage] = useState('');
-  const [responseModalIsOpen, setResponseModalIsOpen] = useState(false);
-  const [submittedTransactions, setSubmittedTransactions] = useState(new Set());
+  const [submittedMap, setSubmittedMap] = useState({}); // State to track submitted transactions
+  const [modalOpen, setModalOpen] = useState(false); // State to control modal visibility
+  const [selectedTransaction, setSelectedTransaction] = useState(null); // State to store selected transaction
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-  if (error) {
-    console.error('GraphQL query error:', error);
-    return <p>Error fetching errored transactions</p>;
-  }
-
+  // Function to handle viewing JSON in a modal
   const handleViewJSON = (json) => {
-    setJsonToView(json);
-    setModalIsOpen(true);
+    setSelectedTransaction(json);
+    setModalOpen(true);
   };
 
-  const handleSubmitToRestAPI = async (transaction, index) => {
+  // Function to handle submitting transaction to REST API
+  const handleSubmitToRestAPI = async (transaction) => {
     try {
       const response = await axios.post('http://localhost:8010/api/store', transaction.requestJson, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      setSubmitMessage(`Response: ${response.status} - ${response.statusText}`);
-      setSubmittedTransactions((prevSet) => new Set([...prevSet, `${transaction.keyCode}-${index}`]));
-      setResponseModalIsOpen(true);
+      // Update submitted state
+      setSubmittedMap(prevState => ({
+        ...prevState,
+        [transaction.id]: true,
+      }));
+      // Show success message
+      alert(`Response: ${JSON.stringify(response.data, null, 2)}`);
     } catch (error) {
       console.error('Error submitting to REST API:', error);
-      setSubmitMessage(`Error: ${error.response?.status} - ${error.response?.statusText}`);
-      setResponseModalIsOpen(true);
+      alert('Error submitting to REST API');
     }
   };
 
+  if (loading) return <p>Loading...</p>;
+  if (error) {
+    console.error('GraphQL query error:', error);
+    return <p>Error fetching errored transactions</p>;
+  }
+
+  // Modal content for displaying JSON
+  const modalContent = selectedTransaction && (
+    <Modal isOpen={modalOpen} onRequestClose={() => setModalOpen(false)} ariaHideApp={false}>
+      <pre>{JSON.stringify(selectedTransaction, null, 2)}</pre>
+      <button onClick={() => setModalOpen(false)}>Close</button>
+    </Modal>
+  );
+
   return (
-    <div className="container">
+    <div>
       <h2>Errored Transactions</h2>
       <table>
         <thead>
@@ -102,8 +73,8 @@ const ErroredTransactions = () => {
           </tr>
         </thead>
         <tbody>
-          {data.getErroredTransaction.map((transaction, index) => (
-            <tr key={index}>
+          {data.getErroredTransaction.map((transaction) => (
+            <tr key={transaction.id}>
               <td>{transaction.keyCode}</td>
               <td>
                 <button onClick={() => handleViewJSON(transaction.requestJson)}>
@@ -111,50 +82,20 @@ const ErroredTransactions = () => {
                 </button>
               </td>
               <td>
-                <button
-                  onClick={() => handleSubmitToRestAPI(transaction, index)}
-                  disabled={submittedTransactions.has(`${transaction.keyCode}-${index}`)}
-                  style={{
-                    backgroundColor: submittedTransactions.has(`${transaction.keyCode}-${index}`) ? '#4CAF50' : '#fdd835',
-                    color: '#000',
-                    border: 'none',
-                    borderRadius: '5px',
-                    padding: '10px 20px',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.3s ease, color 0.3s ease',
-                    display: 'inline-block',
-                    pointerEvents: submittedTransactions.has(`${transaction.keyCode}-${index}`) ? 'none' : 'auto',
-                  }}
-                >
-                  {submittedTransactions.has(`${transaction.keyCode}-${index}`) ? 'Submitted' : 'Submit'}
-                </button>
+                {!submittedMap[transaction.id] && (
+                  <button onClick={() => handleSubmitToRestAPI(transaction)}>
+                    Submit
+                  </button>
+                )}
+                {submittedMap[transaction.id] && (
+                  <span style={{ color: '#888', marginLeft: '10px' }}>Submitted</span>
+                )}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-
-      <Modal
-        isOpen={modalIsOpen}
-        onRequestClose={() => setModalIsOpen(false)}
-        style={customStyles}
-        contentLabel="View JSON"
-      >
-        <h2>Request JSON</h2>
-        <pre>{JSON.stringify(jsonToView, null, 2)}</pre>
-        <button onClick={() => setModalIsOpen(false)}>Close</button>
-      </Modal>
-
-      <Modal
-        isOpen={responseModalIsOpen}
-        onRequestClose={() => setResponseModalIsOpen(false)}
-        style={responseModalStyles}
-        contentLabel="Response Message"
-      >
-        <h2>Response</h2>
-        <p>{submitMessage}</p>
-        <button onClick={() => setResponseModalIsOpen(false)}>Close</button>
-      </Modal>
+      {modalContent}
     </div>
   );
 };
