@@ -41,7 +41,7 @@ const responseModalStyles = {
 };
 
 // Set the app element for accessibility
-Modal.setAppElement('#root');  // Replace '#root' with the id of your app's root element
+Modal.setAppElement('#root'); // Replace '#root' with the id of your app's root element
 
 const GET_ERRORED_TRANSACTION = gql`
   query GetErroredTransaction {
@@ -81,7 +81,7 @@ const ErroredTransactions = () => {
         },
       });
       setSubmitMessage(`Response: ${response.status} - ${response.statusText}`);
-      setSubmittedTransactions(prevSet => new Set([...prevSet, `${transaction.keyCode}-${index}`]));
+      setSubmittedTransactions((prevSet) => new Set([...prevSet, `${transaction.keyCode}-${index}`]));
       setResponseModalIsOpen(true);
     } catch (error) {
       console.error('Error submitting to REST API:', error);
@@ -114,9 +114,19 @@ const ErroredTransactions = () => {
                 <button
                   onClick={() => handleSubmitToRestAPI(transaction, index)}
                   disabled={submittedTransactions.has(`${transaction.keyCode}-${index}`)}
-                  style={{ display: submittedTransactions.has(`${transaction.keyCode}-${index}`) ? 'none' : 'inline-block' }}
+                  style={{
+                    backgroundColor: submittedTransactions.has(`${transaction.keyCode}-${index}`) ? '#4CAF50' : '#fdd835',
+                    color: '#000',
+                    border: 'none',
+                    borderRadius: '5px',
+                    padding: '10px 20px',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.3s ease, color 0.3s ease',
+                    display: 'inline-block',
+                    pointerEvents: submittedTransactions.has(`${transaction.keyCode}-${index}`) ? 'none' : 'auto',
+                  }}
                 >
-                  Submit
+                  {submittedTransactions.has(`${transaction.keyCode}-${index}`) ? 'Submitted' : 'Submit'}
                 </button>
               </td>
             </tr>
