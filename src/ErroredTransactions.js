@@ -73,7 +73,7 @@ const ErroredTransactions = () => {
     setModalIsOpen(true);
   };
 
-  const handleSubmitToRestAPI = async (transaction) => {
+  const handleSubmitToRestAPI = async (transaction, index) => {
     try {
       const response = await axios.post('http://localhost:8010/api/store', transaction.requestJson, {
         headers: {
@@ -81,7 +81,7 @@ const ErroredTransactions = () => {
         },
       });
       setSubmitMessage(`Response: ${response.status} - ${response.statusText}`);
-      setSubmittedTransactions(prevSet => new Set([...prevSet, transaction.keyCode]));
+      setSubmittedTransactions(prevSet => new Set([...prevSet, `${transaction.keyCode}-${index}`]));
       setResponseModalIsOpen(true);
     } catch (error) {
       console.error('Error submitting to REST API:', error);
@@ -112,9 +112,9 @@ const ErroredTransactions = () => {
               </td>
               <td>
                 <button
-                  onClick={() => handleSubmitToRestAPI(transaction)}
-                  disabled={submittedTransactions.has(transaction.keyCode)}
-                  style={{ display: submittedTransactions.has(transaction.keyCode) ? 'none' : 'inline-block' }}
+                  onClick={() => handleSubmitToRestAPI(transaction, index)}
+                  disabled={submittedTransactions.has(`${transaction.keyCode}-${index}`)}
+                  style={{ display: submittedTransactions.has(`${transaction.keyCode}-${index}`) ? 'none' : 'inline-block' }}
                 >
                   Submit
                 </button>
