@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { useQuery, gql } from '@apollo/client';
 import axios from 'axios';
-import Modal from 'react-modal'; // Make sure react-modal is installed and imported properly
+import Modal from 'react-modal';
 
 // GraphQL query to fetch errored transactions
 const GET_ERRORED_TRANSACTION = gql`
   query GetErroredTransaction {
     getErroredTransaction {
-      id
       keyCode
       requestJson
     }
@@ -37,7 +36,7 @@ const ErroredTransactions = () => {
       // Update submitted state
       setSubmittedMap(prevState => ({
         ...prevState,
-        [transaction.id]: true,
+        [transaction.keyCode]: true,
       }));
       // Show success message
       alert(`Response: ${JSON.stringify(response.data, null, 2)}`);
@@ -74,7 +73,7 @@ const ErroredTransactions = () => {
         </thead>
         <tbody>
           {data.getErroredTransaction.map((transaction) => (
-            <tr key={transaction.id}>
+            <tr key={transaction.keyCode}>
               <td>{transaction.keyCode}</td>
               <td>
                 <button onClick={() => handleViewJSON(transaction.requestJson)}>
@@ -82,12 +81,12 @@ const ErroredTransactions = () => {
                 </button>
               </td>
               <td>
-                {!submittedMap[transaction.id] && (
+                {!submittedMap[transaction.keyCode] && (
                   <button onClick={() => handleSubmitToRestAPI(transaction)}>
                     Submit
                   </button>
                 )}
-                {submittedMap[transaction.id] && (
+                {submittedMap[transaction.keyCode] && (
                   <span style={{ color: '#888', marginLeft: '10px' }}>Submitted</span>
                 )}
               </td>
