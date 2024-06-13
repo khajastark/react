@@ -15,12 +15,21 @@ const ErroredTransactions = () => {
   const { loading, error, data } = useQuery(GET_ERRORED_TRANSACTION);
 
   if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error fetching errored transactions</p>;
+  if (error) {
+    console.error('GraphQL query error:', error);
+    return <p>Error fetching errored transactions</p>;
+  }
 
-  // Ensure data.getErroredTransaction is defined and is an array
-  if (!data || !Array.isArray(data.getErroredTransaction)) {
+  // Log the data received from the query to verify its structure
+  console.log('Received data:', data);
+
+  // Ensure data.getErroredTransaction is defined and is an object
+  if (!data || typeof data.getErroredTransaction !== 'object') {
+    console.error('Unexpected data structure:', data);
     return <p>No errored transactions found.</p>;
   }
+
+  const transaction = data.getErroredTransaction;
 
   const handleViewJSON = (json) => {
     alert(JSON.stringify(json, null, 2));
@@ -52,21 +61,19 @@ const ErroredTransactions = () => {
           </tr>
         </thead>
         <tbody>
-          {data.getErroredTransaction.map((transaction, index) => (
-            <tr key={index}>
-              <td>{transaction.keyCode}</td>
-              <td>
-                <button onClick={() => handleViewJSON(transaction.requestJson)}>
-                  View JSON
-                </button>
-              </td>
-              <td>
-                <button onClick={() => handleSubmitToRestAPI(transaction)}>
-                  Submit
-                </button>
-              </td>
-            </tr>
-          ))}
+          <tr>
+            <td>{transaction.keyCode}</td>
+            <td>
+              <button onClick={() => handleViewJSON(transaction.requestJson)}>
+                View JSON
+              </button>
+            </td>
+            <td>
+              <button onClick={() => handleSubmitToRestAPI(transaction)}>
+                Submit
+              </button>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
