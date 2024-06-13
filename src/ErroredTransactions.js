@@ -61,7 +61,6 @@ const ErroredTransactions = () => {
   const [submittedTransactions, setSubmittedTransactions] = useState(new Set());
 
   if (loading) {
-    console.log('Loading data...');
     return <p>Loading...</p>;
   }
   if (error) {
@@ -69,44 +68,27 @@ const ErroredTransactions = () => {
     return <p>Error fetching errored transactions</p>;
   }
 
-  console.log('Received data:', data);
-
-  // Ensure data.getErroredTransaction is defined and is an array
-  if (!data || !Array.isArray(data.getErroredTransaction)) {
-    console.error('Unexpected data structure:', data);
-    return <p>No errored transactions found.</p>;
-  }
-
   const handleViewJSON = (json) => {
-    console.log('Viewing JSON:', json);
     setJsonToView(json);
     setModalIsOpen(true);
   };
 
   const handleSubmitToRestAPI = async (transaction) => {
-    console.log('Submitting transaction:', transaction);
     try {
       const response = await axios.post('http://localhost:8010/api/store', transaction.requestJson, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      console.log('Response from REST API:', response);
       setSubmitMessage(`Response: ${response.status} - ${response.statusText}`);
-      setSubmittedTransactions(prevSet => {
-        const newSet = new Set(prevSet);
-        newSet.add(transaction.keyCode);
-        console.log('Updated submittedTransactions:', newSet);
-        return newSet;
-      });
+      setSubmittedTransactions(prevSet => new Set([...prevSet, transaction.keyCode]));
+      setResponseModalIsOpen(true);
     } catch (error) {
       console.error('Error submitting to REST API:', error);
       setSubmitMessage(`Error: ${error.response?.status} - ${error.response?.statusText}`);
+      setResponseModalIsOpen(true);
     }
-    setResponseModalIsOpen(true);
   };
-
-  console.log('Current submittedTransactions:', submittedTransactions);
 
   return (
     <div className="container">
@@ -132,6 +114,7 @@ const ErroredTransactions = () => {
                 <button
                   onClick={() => handleSubmitToRestAPI(transaction)}
                   disabled={submittedTransactions.has(transaction.keyCode)}
+                  style={{ display: submittedTransactions.has(transaction.keyCode) ? 'none' : 'inline-block' }}
                 >
                   Submit
                 </button>
