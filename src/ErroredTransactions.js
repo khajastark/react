@@ -114,19 +114,9 @@ const ErroredTransactions = () => {
                 <button
                   onClick={() => handleSubmitToRestAPI(transaction, index)}
                   disabled={submittedTransactions.has(`${transaction.keyCode}-${index}`)}
-                  style={{
-                    backgroundColor: '#ccc', // Gray background
-                    color: '#000', // Black text
-                    border: 'none',
-                    borderRadius: '5px',
-                    padding: '10px 20px',
-                    cursor: 'default', // Default cursor
-                    transition: 'background-color 0.3s ease, color 0.3s ease',
-                    display: 'inline-block',
-                    pointerEvents: 'none', // Disable pointer events
-                  }}
+                  style={{ display: submittedTransactions.has(`${transaction.keyCode}-${index}`) ? 'none' : 'inline-block' }}
                 >
-                  {submittedTransactions.has(`${transaction.keyCode}-${index}`) ? 'Submitted' : 'Submit'}
+                  Submit
                 </button>
               </td>
             </tr>
