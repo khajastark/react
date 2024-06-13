@@ -7,15 +7,32 @@ import './styles.css'; // Ensure this is imported to apply styles
 // Set up modal styles
 const customStyles = {
   content: {
+    top: 'auto',
+    left: '50%',
+    right: 'auto',
+    bottom: '20px',
+    marginRight: '-50%',
+    transform: 'translate(-50%, 0)',
+    width: '80%',
+    maxHeight: '80vh',
+    overflow: 'auto',
+    borderRadius: '10px',
+    border: '1px solid #000',
+    padding: '20px',
+    backgroundColor: '#fff',
+  },
+};
+
+// Response message modal styles
+const responseModalStyles = {
+  content: {
     top: '50%',
     left: '50%',
     right: 'auto',
     bottom: 'auto',
     marginRight: '-50%',
     transform: 'translate(-50%, -50%)',
-    width: '80%',
-    maxHeight: '80vh',
-    overflow: 'auto',
+    width: '400px',
     borderRadius: '10px',
     border: '1px solid #000',
     padding: '20px',
@@ -40,6 +57,8 @@ const ErroredTransactions = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [jsonToView, setJsonToView] = useState(null);
   const [submitMessage, setSubmitMessage] = useState('');
+  const [responseModalIsOpen, setResponseModalIsOpen] = useState(false);
+  const [submittedTransactions, setSubmittedTransactions] = useState(new Set());
 
   if (loading) return <p>Loading...</p>;
   if (error) {
@@ -51,12 +70,10 @@ const ErroredTransactions = () => {
   console.log('Received data:', data);
 
   // Ensure data.getErroredTransaction is defined and is an object
-  if (!data || typeof data.getErroredTransaction !== 'object') {
+  if (!data || !Array.isArray(data.getErroredTransaction)) {
     console.error('Unexpected data structure:', data);
     return <p>No errored transactions found.</p>;
   }
-
-  const transaction = data.getErroredTransaction;
 
   const handleViewJSON = (json) => {
     setJsonToView(json);
@@ -92,9 +109,14 @@ const ErroredTransactions = () => {
           message = 'Unexpected Error';
       }
       setSubmitMessage(message);
+      setResponseModalIsOpen(true);
+
+      // Add the transaction key to the submittedTransactions set
+      setSubmittedTransactions(new Set(submittedTransactions).add(transaction.keyCode));
     } catch (error) {
       console.error('Error submitting to REST API:', error);
       setSubmitMessage(`Error: ${error.message}`);
+      setResponseModalIsOpen(true);
     }
   };
 
@@ -110,19 +132,23 @@ const ErroredTransactions = () => {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>{transaction.keyCode}</td>
-            <td>
-              <button onClick={() => handleViewJSON(transaction.requestJson)}>
-                View JSON
-              </button>
-            </td>
-            <td>
-              <button onClick={() => handleSubmitToRestAPI(transaction)}>
-                Submit
-              </button>
-            </td>
-          </tr>
+          {data.getErroredTransaction.map((transaction, index) => (
+            <tr key={index}>
+              <td>{transaction.keyCode}</td>
+              <td>
+                <button onClick={() => handleViewJSON(transaction.requestJson)}>
+                  View JSON
+                </button>
+              </td>
+              <td>
+                {!submittedTransactions.has(transaction.keyCode) && (
+                  <button onClick={() => handleSubmitToRestAPI(transaction)}>
+                    Submit
+                  </button>
+                )}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
 
@@ -137,7 +163,16 @@ const ErroredTransactions = () => {
         <button onClick={() => setModalIsOpen(false)}>Close</button>
       </Modal>
 
-      {submitMessage && <p>{submitMessage}</p>}
+      <Modal
+        isOpen={responseModalIsOpen}
+        onRequestClose={() => setResponseModalIsOpen(false)}
+        style={responseModalStyles}
+        contentLabel="Response Message"
+      >
+        <h2>Response</h2>
+        <p>{submitMessage}</p>
+        <button onClick={() => setResponseModalIsOpen(false)}>Close</button>
+      </Modal>
     </div>
   );
 };
