@@ -58,7 +58,7 @@ const ErroredTransactions = () => {
   const [jsonToView, setJsonToView] = useState(null);
   const [submitMessage, setSubmitMessage] = useState('');
   const [responseModalIsOpen, setResponseModalIsOpen] = useState(false);
-  const [submittedTransactions, setSubmittedTransactions] = useState(new Set());
+  const [submittedTransactions, setSubmitted] = useState(new Set());
 
   if (loading) return <p>Loading...</p>;
   if (error) {
@@ -66,10 +66,7 @@ const ErroredTransactions = () => {
     return <p>Error fetching errored transactions</p>;
   }
 
-  // Log the data received from the query to verify its structure
-  console.log('Received data:', data);
-
-  // Ensure data.getErroredTransaction is defined and is an object
+  // Ensure data.getErroredTransaction is defined and is an array
   if (!data || !Array.isArray(data.getErroredTransaction)) {
     console.error('Unexpected data structure:', data);
     return <p>No errored transactions found.</p>;
@@ -87,43 +84,19 @@ const ErroredTransactions = () => {
           'Content-Type': 'application/json',
         },
       });
-
-      let message = '';
-      switch (response.status) {
-        case 200:
-          message = 'Success/OK';
-          break;
-        case 400:
-          message = 'Bad Request';
-          break;
-        case 401:
-          message = 'Unauthorized';
-          break;
-        case 404:
-          message = 'Not Found';
-          break;
-        case 500:
-          message = 'Internal Server Error';
-          break;
-        default:
-          message = 'Unexpected Error';
-      }
-      setSubmitMessage(message);
-      setResponseModalIsOpen(true);
-
-      // Add the transaction key to the submittedTransactions set
-      setSubmittedTransactions(new Set(submittedTransactions).add(transaction.keyCode));
+      setSubmitMessage(`Response: ${response.status} - ${response.statusText}`);
+      setSubmitted(new Set(submittedTransactions).add(transaction.keyCode));
     } catch (error) {
       console.error('Error submitting to REST API:', error);
-      setSubmitMessage(`Error: ${error.message}`);
-      setResponseModalIsOpen(true);
+      setSubmitMessage(`Error: ${error.response?.status} - ${error.response?.statusText}`);
     }
+    setResponseModalIsOpen(true);
   };
 
   return (
     <div className="container">
       <h2>Errored Transactions</h2>
-      <table className="table-container">
+      <table>
         <thead>
           <tr>
             <th>Key Code</th>
@@ -141,11 +114,12 @@ const ErroredTransactions = () => {
                 </button>
               </td>
               <td>
-                {!submittedTransactions.has(transaction.keyCode) && (
-                  <button onClick={() => handleSubmitToRestAPI(transaction)}>
-                    Submit
-                  </button>
-                )}
+                <button
+                  onClick={() => handleSubmitToRestAPI(transaction)}
+                  disabled={submittedTransactions.has(transaction.keyCode)}
+                >
+                  Submit
+                </button>
               </td>
             </tr>
           ))}
