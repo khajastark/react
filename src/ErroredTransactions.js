@@ -4,8 +4,44 @@ import axios from 'axios';
 import Modal from 'react-modal';
 import './styles.css'; // Ensure this is imported to apply styles
 
+// Set up modal styles
+const customStyles = {
+  content: {
+    top: 'auto',
+    left: '50%',
+    right: 'auto',
+    bottom: '20px',
+    marginRight: '-50%',
+    transform: 'translate(-50%, 0)',
+    width: '80%',
+    maxHeight: '80vh',
+    overflow: 'auto',
+    borderRadius: '10px',
+    border: '1px solid #000',
+    padding: '20px',
+    backgroundColor: '#fff',
+  },
+};
+
+// Response message modal styles
+const responseModalStyles = {
+  content: {
+    top: '50%',
+    left: '50%',
+    right: 'auto',
+    bottom: 'auto',
+    marginRight: '-50%',
+    transform: 'translate(-50%, -50%)',
+    width: '400px',
+    borderRadius: '10px',
+    border: '1px solid #000',
+    padding: '20px',
+    backgroundColor: '#fff',
+  },
+};
+
 // Set the app element for accessibility
-Modal.setAppElement('#root'); // Replace '#root' with the id of your app's root element
+Modal.setAppElement('#root');  // Replace '#root' with the id of your app's root element
 
 const GET_ERRORED_TRANSACTION = gql`
   query GetErroredTransaction {
@@ -45,7 +81,7 @@ const ErroredTransactions = () => {
         },
       });
       setSubmitMessage(`Response: ${response.status} - ${response.statusText}`);
-      setSubmittedTransactions((prevSet) => new Set([...prevSet, `${transaction.keyCode}-${index}`]));
+      setSubmittedTransactions(prevSet => new Set([...prevSet, `${transaction.keyCode}-${index}`]));
       setResponseModalIsOpen(true);
     } catch (error) {
       console.error('Error submitting to REST API:', error);
@@ -78,9 +114,9 @@ const ErroredTransactions = () => {
                 <button
                   onClick={() => handleSubmitToRestAPI(transaction, index)}
                   disabled={submittedTransactions.has(`${transaction.keyCode}-${index}`)}
-                  className={submittedTransactions.has(`${transaction.keyCode}-${index}`) ? 'submitted-button' : ''}
+                  style={{ display: submittedTransactions.has(`${transaction.keyCode}-${index}`) ? 'none' : 'inline-block' }}
                 >
-                  {submittedTransactions.has(`${transaction.keyCode}-${index}`) ? 'Submitted' : 'Submit'}
+                  Submit
                 </button>
               </td>
             </tr>
@@ -91,8 +127,7 @@ const ErroredTransactions = () => {
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
-        className="custom-modal"
-        overlayClassName="custom-modal-overlay"
+        style={customStyles}
         contentLabel="View JSON"
       >
         <h2>Request JSON</h2>
@@ -103,8 +138,7 @@ const ErroredTransactions = () => {
       <Modal
         isOpen={responseModalIsOpen}
         onRequestClose={() => setResponseModalIsOpen(false)}
-        className="custom-modal"
-        overlayClassName="custom-modal-overlay"
+        style={responseModalStyles}
         contentLabel="Response Message"
       >
         <h2>Response</h2>
