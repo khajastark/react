@@ -23,6 +23,9 @@ const customStyles = {
   },
 };
 
+// Set the app element for accessibility
+Modal.setAppElement('#root');  // Replace '#root' with the id of your app's root element
+
 const GET_ERRORED_TRANSACTION = gql`
   query GetErroredTransaction {
     getErroredTransaction {
@@ -91,7 +94,7 @@ const ErroredTransactions = () => {
       setSubmitMessage(message);
     } catch (error) {
       console.error('Error submitting to REST API:', error);
-      setSubmitMessage('Error submitting to REST API');
+      setSubmitMessage(`Error: ${error.message}`);
     }
   };
 
